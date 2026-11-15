@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Latar Belakang Kotak Melengkung Gradien Ungu - Biru -->
+    <path android:pathData="M24,6 L84,6 A18,18 0 0,1 102,24 L102,84 A18,18 0 0,1 84,102 L24,102 A18,18 0 0,1 6,84 L6,24 A18,18 0 0,1 24,6 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="10"
+                android:startY="10"
+                android:endX="98"
+                android:endY="98"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#7C3AED"/>
+                <item android:offset="0.5" android:color="#4F46E5"/>
+                <item android:offset="1.0" android:color="#06B6D4"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Lingkaran Radar Luar -->
+    <path
+        android:pathData="M54,22 A32,32 0 1,1 53.99,22 Z"
+        android:strokeWidth="3"
+        android:strokeColor="#44FFFFFF"
+        android:fillColor="#00000000"/>
+
+    <!-- Pin Lokasi Utama di Tengah -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,27 C41.8,27 32,36.8 32,49 C32,65.5 54,84 54,84 C54,84 76,65.5 76,49 C76,36.8 66.2,27 54,27 Z M54,57 C49.6,57 46,53.4 46,49 C46,44.6 49.6,41 54,41 C58.4,41 62,44.6 62,49 C62,53.4 58.4,57 54,57 Z"/>
+</vector>
