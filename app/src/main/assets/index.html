@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Homepass Teleport Pro</title>
+    <title>Field Signal Utility</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
-            --bg-dark: #06040d;
-            --bg-card: rgba(20, 12, 38, 0.92);
+            --bg-dark: #070510;
+            --bg-card: rgba(22, 14, 42, 0.92);
             --border-purple: rgba(139, 92, 246, 0.35);
             --accent: #8b5cf6;
             --cyan: #06b6d4;
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
@@ -37,10 +38,10 @@
         }
 
         header {
-            background: rgba(13, 8, 26, 0.94);
+            background: rgba(13, 8, 26, 0.95);
             backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--border-purple);
-            padding: 14px 16px;
+            padding: 13px 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -57,28 +58,28 @@
         }
 
         .brand-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 11px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #7c3aed, #06b6d4);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 0 16px rgba(139, 92, 246, 0.6);
+            font-size: 1.15rem;
+            box-shadow: 0 0 14px rgba(139, 92, 246, 0.5);
         }
 
         .brand-text h1 {
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             font-weight: 900;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             background: linear-gradient(90deg, #fff, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .brand-text span {
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             color: #38bdf8;
             display: block;
             font-weight: 700;
@@ -94,9 +95,9 @@
             background: rgba(139, 92, 246, 0.18);
             border: 1px solid var(--border-purple);
             color: #e9d5ff;
-            padding: 7px 11px;
-            border-radius: 10px;
-            font-size: 0.74rem;
+            padding: 6px 10px;
+            border-radius: 9px;
+            font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
         }
@@ -104,38 +105,62 @@
         .container {
             max-width: 480px;
             margin: 0 auto;
-            padding: 14px;
+            padding: 13px;
         }
 
+        #loader-screen {
+            background: var(--bg-card);
+            border: 1px solid var(--border-purple);
+            border-radius: 18px;
+            padding: 28px 18px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .radar-spinner {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3.5px solid rgba(168, 85, 247, 0.2);
+            border-top-color: #a855f7;
+            border-right-color: #06b6d4;
+            margin: 0 auto 14px;
+            animation: spin 0.85s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .mock-status-banner {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.88);
             border: 1.5px solid rgba(148, 163, 184, 0.25);
             border-radius: 14px;
-            padding: 12px 14px;
-            margin-bottom: 14px;
+            padding: 11px 13px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
             transition: all 0.3s ease;
         }
 
         .mock-status-banner.active {
             background: linear-gradient(135deg, rgba(6, 78, 59, 0.85), rgba(17, 24, 39, 0.95));
             border-color: #10b981;
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+            box-shadow: 0 0 22px rgba(16, 185, 129, 0.32);
         }
 
         .status-left {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 9px;
         }
 
         .pulse-dot {
-            width: 12px;
-            height: 12px;
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
             background: #64748b;
+            flex-shrink: 0;
         }
 
         .mock-status-banner.active .pulse-dot {
@@ -154,35 +179,67 @@
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-purple);
             border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 14px;
+            padding: 14px;
+            margin-bottom: 13px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
         }
 
-        #setup-csv-screen {
-            text-align: center;
-            padding: 26px 18px;
+        /* TABS MODE PENCARIAN (SATUAN VS BATCH LIST 15) */
+        .mode-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: rgba(8, 5, 18, 0.7);
+            padding: 4px;
+            border-radius: 11px;
+            margin-bottom: 11px;
+            border: 1px solid rgba(139, 92, 246, 0.25);
+        }
+
+        .mode-tab-btn {
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-tab-btn.active {
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4);
         }
 
         .search-bar-wrap { position: relative; }
         .search-input-box { display: flex; gap: 8px; }
 
-        input[type="text"] {
+        input[type="text"], textarea {
             width: 100%;
-            padding: 13px 14px;
+            padding: 12px 13px;
             background: rgba(8, 5, 18, 0.95);
             border: 1.5px solid rgba(168, 85, 247, 0.5);
             border-radius: 12px;
             color: #fff;
-            font-size: 0.95rem;
-            font-weight: 800;
+            font-size: 0.9rem;
+            font-weight: 700;
             outline: none;
-            text-transform: uppercase;
         }
 
-        input[type="text"]:focus {
+        textarea {
+            resize: vertical;
+            min-height: 92px;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            font-family: monospace;
+        }
+
+        input[type="text"]:focus, textarea:focus {
             border-color: #38bdf8;
-            box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
         }
 
         .btn-paste {
@@ -190,9 +247,9 @@
             color: white;
             border: none;
             border-radius: 12px;
-            padding: 0 14px;
+            padding: 0 13px;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             cursor: pointer;
             white-space: nowrap;
         }
@@ -203,13 +260,13 @@
             border: 1px solid #a855f7;
             border-radius: 12px;
             margin-top: 8px;
-            max-height: 240px;
+            max-height: 220px;
             overflow-y: auto;
             box-shadow: 0 12px 30px rgba(0,0,0,0.85);
         }
 
         .auto-item {
-            padding: 11px 14px;
+            padding: 10px 13px;
             border-bottom: 1px solid rgba(139, 92, 246, 0.18);
             display: flex;
             justify-content: space-between;
@@ -221,41 +278,63 @@
             background: rgba(139, 92, 246, 0.28);
         }
 
+        /* PANEL NAVIGASI ANTREAN NEXT / BACK */
+        .queue-nav-card {
+            background: linear-gradient(135deg, rgba(49, 16, 82, 0.9), rgba(15, 23, 42, 0.95));
+            border: 1.5px solid #c084fc;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 13px;
+        }
+
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .queue-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
         .unified-coord-card {
             background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 18, 56, 0.95));
             border: 1.5px solid #38bdf8;
             border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
         }
 
         .unified-coord-label {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: #94a3b8;
             font-weight: 800;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             display: flex;
             justify-content: space-between;
         }
 
         .unified-coord-value {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: 900;
             color: #38bdf8;
             font-family: "Courier New", Courier, monospace;
             background: rgba(0, 0, 0, 0.45);
-            padding: 10px 12px;
+            padding: 9px 10px;
             border-radius: 10px;
             border: 1px dashed rgba(56, 189, 248, 0.4);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
             user-select: all;
         }
 
         #map-container {
             width: 100%;
-            height: 250px;
+            height: 235px;
             border-radius: 14px;
             border: 1.5px solid rgba(168, 85, 247, 0.45);
             margin-bottom: 10px;
@@ -265,24 +344,24 @@
         .control-grid {
             display: grid;
             grid-template-columns: 1.35fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 9px;
+            margin-bottom: 9px;
         }
 
         .btn {
             width: 100%;
-            padding: 13px 12px;
+            padding: 12px 10px;
             border: none;
-            border-radius: 12px;
+            border-radius: 11px;
             font-weight: 800;
-            font-size: 0.9rem;
+            font-size: 0.86rem;
             cursor: pointer;
             transition: transform 0.12s, box-shadow 0.2s;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .btn:active:not(:disabled) { transform: scale(0.96); }
@@ -295,64 +374,61 @@
 
         .btn-play {
             background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 5px 18px rgba(16, 185, 129, 0.35);
         }
 
         .btn-stop {
             background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 5px 18px rgba(239, 68, 68, 0.35);
+        }
+
+        .btn-nav {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            padding: 10px;
+            font-size: 0.84rem;
         }
 
         .btn-copy-sub {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            padding: 10px;
-            font-size: 0.82rem;
+            padding: 9px;
+            font-size: 0.8rem;
         }
 
-        .btn-outline {
-            background: rgba(139, 92, 246, 0.14);
-            border: 1.5px solid rgba(168, 85, 247, 0.55);
-            color: #e9d5ff;
-            padding: 11px 12px;
-            font-size: 0.82rem;
+        .btn-dev {
+            background: rgba(245, 158, 11, 0.16);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            color: #fde68a;
+            padding: 6px 10px;
+            border-radius: 9px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         .teleport-pin {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: radial-gradient(circle, #10b981 0%, #047857 100%);
             border: 2.5px solid #ffffff;
-            box-shadow: 0 0 18px #10b981;
+            box-shadow: 0 0 16px #10b981;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.95rem;
-        }
-
-        .recent-chip {
-            display: inline-block;
-            background: rgba(139, 92, 246, 0.18);
-            border: 1px solid rgba(168, 85, 247, 0.45);
-            color: #e9d5ff;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.74rem;
-            font-weight: 700;
-            margin: 3px 4px 3px 0;
-            cursor: pointer;
+            font-size: 0.9rem;
         }
 
         #toast {
             position: fixed;
-            bottom: 24px;
+            bottom: 22px;
             left: 50%;
             transform: translateX(-50%) translateY(80px);
             background: linear-gradient(135deg, #059669, #10b981);
             color: #fff;
-            padding: 10px 22px;
+            padding: 10px 20px;
             border-radius: 30px;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             font-weight: 800;
             box-shadow: 0 8px 25px rgba(0,0,0,0.7);
             z-index: 999999;
@@ -371,86 +447,108 @@
 
     <header>
         <div class="brand">
-            <div class="brand-icon">🛰️</div>
+            <div class="brand-icon">📡</div>
             <div class="brand-text">
-                <h1>HOMEPASS TELEPORT</h1>
-                <span id="db-count-badge">Database: Memeriksa...</span>
+                <h1>FIELD SIGNAL UTILITY</h1>
+                <span id="db-count-badge">Database: Menghubungkan...</span>
             </div>
         </div>
         <div class="header-actions">
-            <button class="btn-icon-top" onclick="document.getElementById('file-csv-input').click()">📂 Ganti CSV</button>
-            <input type="file" id="file-csv-input" accept=".csv,.txt" style="display: none;" onchange="handleLocalCSVFile(event)">
+            <button class="btn-icon-top" onclick="syncDatabaseFromCloud()">🔄 Sync DB</button>
         </div>
     </header>
 
     <div class="container">
 
-        <div id="setup-csv-screen" class="card" style="display: none;">
-            <div style="font-size: 2.6rem; margin-bottom: 10px;">📂</div>
-            <h3 style="color: #fff; margin-bottom: 6px;">Muat File CSV Homepass</h3>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.4;">
-                Pilih file CSV lokal dari HP Anda (cukup <b>1 kali saja</b>). Seluruh 70.000 data akan disimpan permanen di memori aplikasi!
+        <!-- LAYAR PEMUATAN AWAL DARI GOOGLE APPS SCRIPT -->
+        <div id="loader-screen">
+            <div class="radar-spinner"></div>
+            <h3 style="color: #fff; font-size: 1.02rem; margin-bottom: 6px;" id="loader-title">Menarik Database Cloud...</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;" id="loader-desc">
+                Mengunduh database titik Padang dari Google Apps Script...
             </p>
-            <button class="btn btn-play" onclick="document.getElementById('file-csv-input').click()">
-                📥 PILIH FILE CSV DARI HP
-            </button>
         </div>
 
+        <!-- MENU UTAMA -->
         <div id="main-app" style="display: none;">
 
+            <!-- Banner Status Mock Location + Tombol Pintas Developer Options -->
             <div id="mock-banner" class="mock-status-banner">
                 <div class="status-left">
                     <div class="pulse-dot"></div>
                     <div>
-                        <div style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Status Fake GPS</div>
-                        <b id="mock-status-text" style="font-size: 0.88rem; color: #f8fafc;">NONAKTIF (GPS Asli)</b>
+                        <div style="font-size: 0.66rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Status Lokasi</div>
+                        <b id="mock-status-text" style="font-size: 0.84rem; color: #f8fafc;">NONAKTIF (GPS Asli)</b>
                     </div>
                 </div>
-                <span id="mock-engine-badge" style="font-size: 0.68rem; background: rgba(139,92,246,0.2); color: #d8b4fe; padding: 4px 8px; border-radius: 8px; font-weight: 700;">
-                    Siap
-                </span>
+                <button class="btn-dev" onclick="openDeveloperSettings()">⚙️ Opsi Pengembang</button>
             </div>
 
+            <!-- KARTU PENCARIAN (MODE SATUAN & MODE BATCH LIST 15 HOMEPASS) -->
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <label style="font-size: 0.78rem; color: #c084fc; font-weight: 800;">🔍 CARI KEYCODE / HOMEPASS ID:</label>
-                    <span style="font-size: 0.74rem; color: #38bdf8; cursor: pointer; font-weight: 700;" onclick="clearSearchInput()">✕ Bersihkan</span>
+                <div class="mode-tabs">
+                    <button id="tab-single" class="mode-tab-btn active" onclick="switchSearchMode('single')">🔍 Cari Satuan</button>
+                    <button id="tab-batch" class="mode-tab-btn" onclick="switchSearchMode('batch')">📋 Tempel List (Next/Back)</button>
                 </div>
 
-                <div class="search-bar-wrap">
-                    <div class="search-input-box">
-                        <input type="text" id="hp-search-input" placeholder="Ketik contoh: PAD1-AAH01..." oninput="onSearchHomepass()" autocomplete="off">
-                        <button class="btn-paste" onclick="pasteAndSearch()">📋 Paste</button>
+                <!-- MODE 1: CARI SATUAN -->
+                <div id="panel-single">
+                    <div class="search-bar-wrap">
+                        <div class="search-input-box">
+                            <input type="text" id="hp-search-input" placeholder="Ketik ID: PAD1-AAT01-..." oninput="onSearchHomepass()" autocomplete="off" style="text-transform: uppercase;">
+                            <button class="btn-paste" onclick="pasteSingleSearch()">📋 Paste</button>
+                        </div>
+                        <div id="autocomplete-list"></div>
                     </div>
-                    <div id="autocomplete-list"></div>
                 </div>
 
-                <div id="recent-box" style="margin-top: 10px; display: none;">
-                    <span style="font-size: 0.7rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Terakhir Dicari:</span>
-                    <div id="recent-chips"></div>
+                <!-- MODE 2: TEMPEL LIST (15+ HOMEPASS) -->
+                <div id="panel-batch" style="display: none;">
+                    <textarea id="batch-list-input" placeholder="Tempel daftar Homepass di sini, contoh:&#10;1. PAD1-AAT01-H01142&#10;2. PAD1-AAT01-H01141&#10;3. PAD1-AAT01-H01311"></textarea>
+                    <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; margin-top: 8px;">
+                        <button class="btn btn-copy-sub" onclick="pasteToBatchTextarea()">📋 Paste Teks</button>
+                        <button class="btn btn-play" style="padding: 10px;" onclick="processBatchList()">🚀 Muat Antrean List</button>
+                    </div>
                 </div>
             </div>
 
+            <!-- PANEL NAVIGASI ANTREAN (MUNCUL JIKA LIST DIMUAT) -->
+            <div id="queue-panel" class="queue-nav-card" style="display: none;">
+                <div class="queue-header">
+                    <span style="font-size: 0.78rem; font-weight: 800; color: #e9d5ff;" id="queue-counter-label">Antrean 1 dari 15</span>
+                    <span style="font-size: 0.72rem; color: #fca5a5; cursor: pointer; font-weight: 700;" onclick="closeQueuePanel()">✕ Tutup List</span>
+                </div>
+                <div class="queue-buttons">
+                    <button id="btn-prev-hp" class="btn btn-nav" onclick="navigateQueue(-1)">⬅️ Prev (Mundur)</button>
+                    <button id="btn-next-hp" class="btn btn-nav" onclick="navigateQueue(1)">Next (Lanjut) ➡️</button>
+                </div>
+            </div>
+
+            <!-- KARTU TARGET & KONTROL PLAY / STOP -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div>
-                        <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Target Keycode:</span>
-                        <h2 id="selected-hp-id" style="font-size: 1.2rem; color: #fcd34d; font-weight: 900;">Belum Dipilih</h2>
+                        <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Target Keycode:</span>
+                        <h2 id="selected-hp-id" style="font-size: 1.18rem; color: #fcd34d; font-weight: 900;">Belum Dipilih</h2>
                     </div>
-                    <button class="btn-icon-top" onclick="copyKeycodeOnly()">Salin ID</button>
+                    <span id="drift-badge" style="font-size: 0.7rem; background: rgba(6,182,212,0.16); color: #67e8f9; border: 1px solid rgba(6,182,212,0.4); padding: 4px 8px; border-radius: 8px; font-weight: 800;">
+                        Radius: 0m
+                    </span>
                 </div>
 
+                <!-- KOTAK KOORDINAT GABUNGAN (DENGAN RANDOM OFFSET 1-10M) -->
                 <div class="unified-coord-card">
                     <div class="unified-coord-label">
-                        <span>📍 Koordinat Gabungan (Lat,Lng)</span>
-                        <span style="color: #10b981;">Otomatis Tersalin</span>
+                        <span>📍 Koordinat Aktif (Acak 1–10m)</span>
+                        <span style="color: #10b981;">Auto-Copy</span>
                     </div>
                     <div class="unified-coord-value" id="unified-coord-display">-</div>
                     <button id="btn-copy-coord" class="btn btn-copy-sub" disabled onclick="copyUnifiedCoord()">
-                        📋 SALIN KOORDINAT SAJA
+                        📋 SALIN KOORDINAT INI
                     </button>
                 </div>
 
+                <!-- TOMBOL PLAY & STOP -->
                 <div class="control-grid">
                     <button id="btn-play-mock" class="btn btn-play" disabled onclick="startFakeGPS()">
                         ▶️ PLAY FAKE GPS
@@ -460,66 +558,65 @@
                     </button>
                 </div>
 
+                <!-- Peta Lokasi -->
                 <div id="map-container"></div>
-
-                <button id="btn-geo-intent" class="btn btn-outline" disabled onclick="triggerExternalFakeGPSIntent()">
-                    📲 Lempar Titik ke App Fake GPS / Maps Lain
-                </button>
             </div>
 
         </div>
     </div>
 
-    <div id="toast">Berhasil disalin!</div>
+    <div id="toast">Notifikasi</div>
 
     <script>
+        // URL Google Apps Script milik Anda
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAeFbWSinC1n9g7-4a9kSDVI_kIeQh4Hg1rAmktM1Ja309WylKN82v9fCCp_XW0uNT1w/exec";
+
         let homepassMap = new Map();
         let homepassKeys = [];
 
+        // Variabel Antrean List (15 Homepass Next / Prev)
+        let batchQueue = [];
+        let batchIndex = 0;
+
         let leafletMap = null;
         let targetMarker = null;
-        let currentTarget = { id: null, lat: null, lng: null, combined: null };
+        let radiusCircle = null;
+
+        // Menyimpan koordinat asli (baseLat, baseLng) & koordinat hasil random 1-10m (activeLat, activeLng)
+        let currentTarget = {
+            id: null,
+            baseLat: null,
+            baseLng: null,
+            activeLat: null,
+            activeLng: null,
+            offsetMeters: 0,
+            combined: null
+        };
+
         let isMockingActive = false;
+        let driftInterval = null;
         let searchDebounce = null;
 
         window.onload = async function() {
-            checkBridgeMode();
             let cachedCSV = await loadCSVFromIndexedDB();
-            if (cachedCSV && cachedCSV.length > 20) {
-                let count = parseCSVData(cachedCSV);
+            if (cachedCSV && cachedCSV.length > 50) {
+                let count = parseCompactCSV(cachedCSV);
                 if (count > 0) {
-                    showMainApp();
+                    launchMainApp();
                     return;
                 }
             }
-            document.getElementById("db-count-badge").innerText = "Database: Kosong (Pilih CSV)";
-            document.getElementById("setup-csv-screen").style.display = "block";
+            syncDatabaseFromCloud();
         };
 
-        function checkBridgeMode() {
-            let badge = document.getElementById("mock-engine-badge");
-            if (window.AndroidMockGPS) {
-                badge.innerText = "🟢 Native Mock Ready";
-                badge.style.color = "#6ee7b7";
-            } else {
-                badge.innerText = "⚡ Mode Intent / Copy";
-            }
-        }
-
-        function showMainApp() {
-            document.getElementById("setup-csv-screen").style.display = "none";
-            document.getElementById("main-app").style.display = "block";
-            initMap();
-            renderRecentChips();
-        }
-
+        // ================= INDEXED-DB STORAGE =================
         function openIDB() {
             return new Promise((resolve, reject) => {
-                let req = indexedDB.open("HomepassLocalDB_v3", 1);
+                let req = indexedDB.open("FieldUtilityDB_v4", 1);
                 req.onupgradeneeded = (e) => {
                     let db = e.target.result;
-                    if (!db.objectStoreNames.contains("csvStore")) {
-                        db.createObjectStore("csvStore");
+                    if (!db.objectStoreNames.contains("store")) {
+                        db.createObjectStore("store");
                     }
                 };
                 req.onsuccess = (e) => resolve(e.target.result);
@@ -531,8 +628,8 @@
             try {
                 let db = await openIDB();
                 return new Promise((resolve) => {
-                    let tx = db.transaction("csvStore", "readwrite");
-                    tx.objectStore("csvStore").put(csvText, "local_homepass_csv");
+                    let tx = db.transaction("store", "readwrite");
+                    tx.objectStore("store").put(csvText, "cloud_csv_data");
                     tx.oncomplete = () => resolve(true);
                 });
             } catch (e) {}
@@ -542,8 +639,8 @@
             try {
                 let db = await openIDB();
                 return new Promise((resolve) => {
-                    let tx = db.transaction("csvStore", "readonly");
-                    let req = tx.objectStore("csvStore").get("local_homepass_csv");
+                    let tx = db.transaction("store", "readonly");
+                    let req = tx.objectStore("store").get("cloud_csv_data");
                     req.onsuccess = () => resolve(req.result || null);
                     req.onerror = () => resolve(null);
                 });
@@ -552,104 +649,62 @@
             }
         }
 
-        function handleLocalCSVFile(event) {
-            let file = event.target.files[0];
-            if (!file) return;
+        // ================= AMBIL DATABASE DARI GOOGLE APPS SCRIPT =================
+        function syncDatabaseFromCloud() {
+            document.getElementById("main-app").style.display = "none";
+            document.getElementById("loader-screen").style.display = "block";
+            document.getElementById("loader-title").innerText = "Mengunduh Database Cloud...";
+            document.getElementById("loader-desc").innerText = "Menarik 70.000+ titik dari Google Apps Script...";
 
-            document.getElementById("db-count-badge").innerText = "Memproses CSV...";
-            let reader = new FileReader();
-            reader.onload = async function(e) {
-                let text = e.target.result;
-                let count = parseCSVData(text);
-                if (count > 0) {
-                    await saveCSVToIndexedDB(text);
-                    showMainApp();
-                    showToast(`Sukses menyimpan ${count.toLocaleString("id-ID")} Homepass!`);
-                } else {
-                    alert("Kolom keycode / koordinat tidak ditemukan di file CSV ini.");
-                }
-            };
-            reader.readAsText(file);
+            fetch(APPS_SCRIPT_URL)
+                .then(res => res.json())
+                .then(async (data) => {
+                    if (data && data.status === "success" && data.csv_data) {
+                        let count = parseCompactCSV(data.csv_data);
+                        await saveCSVToIndexedDB(data.csv_data);
+                        launchMainApp();
+                        showToast(`Berhasil memuat ${count.toLocaleString("id-ID")} titik!`);
+                    } else {
+                        throw new Error(data.message || "Format data tidak sesuai");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("loader-title").innerText = "⚠️ Gagal Terhubung ke Server";
+                    document.getElementById("loader-desc").innerText = "Periksa koneksi internet Anda lalu tekan Sync DB di atas.";
+                });
         }
 
-        function parseCSVData(csvText) {
+        function parseCompactCSV(csvText) {
             homepassMap.clear();
             homepassKeys = [];
 
             let lines = csvText.split(/\r?\n/);
-            if (lines.length === 0) return 0;
-
-            let firstLine = lines[0];
-            let delimiter = ",";
-            if (firstLine.includes(";") && !firstLine.includes(",")) delimiter = ";";
-            else if (firstLine.includes("\t")) delimiter = "\t";
-
-            let idxKeycode = 0, idxLat = 1, idxLng = 2, startRow = 0;
-
-            let headerCols = splitCSVRow(firstLine, delimiter).map(h => h.toLowerCase().replace(/["']/g, "").trim());
-            let foundKey = headerCols.findIndex(h => h === "keycode" || h === "homepass_id" || h.includes("keycode") || h.includes("homepass"));
-            let foundLat = headerCols.findIndex(h => h === "building_latitude" || h === "latitude" || h.includes("lat"));
-            let foundLng = headerCols.findIndex(h => h === "building_longitude" || h === "longitude" || h.includes("lon") || h.includes("lng"));
-
-            if (foundKey !== -1 && foundLat !== -1 && foundLng !== -1) {
-                idxKeycode = foundKey;
-                idxLat = foundLat;
-                idxLng = foundLng;
-                startRow = 1;
-            } else if (headerCols.length === 2 && foundKey !== -1) {
-                idxKeycode = 0;
-                idxLat = 1;
-                idxLng = -1;
-                startRow = 1;
-            }
-
-            for (let i = startRow; i < lines.length; i++) {
+            for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if (!line) continue;
+                let parts = line.split(",");
+                if (parts.length < 3) continue;
 
-                let cols = splitCSVRow(line, delimiter);
-                if (cols.length < 2) continue;
+                let key = parts[0].trim().toUpperCase();
+                let lat = parseFloat(parts[1]);
+                let lng = parseFloat(parts[2]);
 
-                let rawKey = (cols[idxKeycode] || "").replace(/["']/g, "").trim().toUpperCase();
-                if (!rawKey || rawKey === "KEYCODE" || rawKey === "HOMEPASS_ID") continue;
-
-                let latStr = "", lngStr = "";
-                if (idxLng === -1 || cols.length === 2) {
-                    let combinedParts = (cols[1] || "").replace(/["']/g, "").split(",");
-                    if (combinedParts.length < 2) continue;
-                    latStr = combinedParts[0].trim();
-                    lngStr = combinedParts[1].trim();
-                } else {
-                    if (cols.length <= Math.max(idxKeycode, idxLat, idxLng)) continue;
-                    latStr = (cols[idxLat] || "").replace(/["']/g, "").trim();
-                    lngStr = (cols[idxLng] || "").replace(/["']/g, "").trim();
-                }
-
-                let lat = parseFloat(latStr);
-                let lng = parseFloat(lngStr);
-                if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) continue;
-
+                if (!key || isNaN(lat) || isNaN(lng)) continue;
                 if (lat > 0 && lat < 10) lat = -lat;
 
-                homepassMap.set(rawKey, [lat, lng]);
+                homepassMap.set(key, [lat, lng]);
             }
 
             homepassKeys = Array.from(homepassMap.keys());
-            document.getElementById("db-count-badge").innerText = `Database: ${homepassMap.size.toLocaleString("id-ID")} Homepass`;
+            document.getElementById("db-count-badge").innerText = `Database: ${homepassMap.size.toLocaleString("id-ID")} Titik`;
             return homepassMap.size;
         }
 
-        function splitCSVRow(rowStr, delimiter) {
-            if (!rowStr.includes('"')) return rowStr.split(delimiter);
-            let result = [], current = "", inQuotes = false;
-            for (let i = 0; i < rowStr.length; i++) {
-                let ch = rowStr[i];
-                if (ch === '"') inQuotes = !inQuotes;
-                else if (ch === delimiter && !inQuotes) { result.push(current); current = ""; }
-                else current += ch;
-            }
-            result.push(current);
-            return result;
+        function launchMainApp() {
+            document.getElementById("loader-screen").style.display = "none";
+            document.getElementById("main-app").style.display = "block";
+            initMap();
         }
 
         function initMap() {
@@ -671,13 +726,101 @@
             });
 
             L.control.layers({ "🛰️ Satelit": gHybrid, "🗺️ Jalan": gStreets }).addTo(leafletMap);
+        }
 
-            leafletMap.on("click", function(e) {
-                let lat = parseFloat(e.latlng.lat.toFixed(6));
-                let lng = parseFloat(e.latlng.lng.toFixed(6));
-                let labelId = currentTarget.id ? currentTarget.id : "TITIK MANUAL";
-                selectTargetHomepass(labelId, lat, lng, false);
-            });
+        // ================= PERHITUNGAN RANDOM RADIUS 1 - 10 METER =================
+        function generateRandomOffsetCoords(baseLat, baseLng) {
+            // Jarak acak antara 1.2 meter sampai 9.8 meter (aman di dalam rentang 1-10m)
+            let distanceMeters = 1.2 + (Math.random() * 8.6);
+            // Sudut arah acak 0 - 360 derajat (dalam radian)
+            let angleRad = Math.random() * 2 * Math.PI;
+
+            // Konversi meter ke derajat koordinat bumi
+            let deltaLat = (distanceMeters * Math.cos(angleRad)) / 111320;
+            let deltaLng = (distanceMeters * Math.sin(angleRad)) / (111320 * Math.cos(baseLat * Math.PI / 180));
+
+            let newLat = parseFloat((baseLat + deltaLat).toFixed(6));
+            let newLng = parseFloat((baseLng + deltaLng).toFixed(6));
+
+            return {
+                lat: newLat,
+                lng: newLng,
+                meters: distanceMeters.toFixed(1)
+            };
+        }
+
+        // ================= PILIH TARGET & TERAPKAN RANDOM 1-10 METER =================
+        function selectTargetHomepass(hpId, baseLat, baseLng, autoCopy) {
+            let offset = generateRandomOffsetCoords(baseLat, baseLng);
+            let combinedStr = `${offset.lat},${offset.lng}`;
+
+            currentTarget = {
+                id: hpId,
+                baseLat: baseLat,
+                baseLng: baseLng,
+                activeLat: offset.lat,
+                activeLng: offset.lng,
+                offsetMeters: offset.meters,
+                combined: combinedStr
+            };
+
+            updateTargetUI();
+
+            if (autoCopy) {
+                copyRawString(combinedStr, null);
+            }
+
+            // Jika Mock GPS sedang menyala, langsung geser titik GPS ke lokasi baru!
+            if (isMockingActive) {
+                pushCoordsToNativeMock();
+            }
+        }
+
+        function updateTargetUI() {
+            document.getElementById("selected-hp-id").innerText = currentTarget.id;
+            document.getElementById("unified-coord-display").innerText = currentTarget.combined;
+            document.getElementById("drift-badge").innerText = `Offset: ±${currentTarget.offsetMeters}m`;
+            document.getElementById("btn-copy-coord").disabled = false;
+            document.getElementById("btn-play-mock").disabled = false;
+
+            if (leafletMap) {
+                let pinIcon = L.divIcon({
+                    className: '',
+                    html: `<div class="teleport-pin">📍</div>`,
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                });
+
+                if (targetMarker) {
+                    targetMarker.setLatLng([currentTarget.activeLat, currentTarget.activeLng]);
+                } else {
+                    targetMarker = L.marker([currentTarget.activeLat, currentTarget.activeLng], { icon: pinIcon }).addTo(leafletMap);
+                }
+
+                // Gambar lingkaran zona aman 10 meter di sekitar titik asli rumah
+                if (radiusCircle) {
+                    radiusCircle.setLatLng([currentTarget.baseLat, currentTarget.baseLng]);
+                } else {
+                    radiusCircle = L.circle([currentTarget.baseLat, currentTarget.baseLng], {
+                        color: '#38bdf8',
+                        fillColor: '#38bdf8',
+                        fillOpacity: 0.15,
+                        weight: 1.5,
+                        radius: 10
+                    }).addTo(leafletMap);
+                }
+
+                targetMarker.bindPopup(`<b>🏷️ ${currentTarget.id}</b><br><code style="color:#38bdf8;">${currentTarget.combined}</code><br><small>Geser acak: ${currentTarget.offsetMeters}m dari pusat</small>`);
+                leafletMap.setView([currentTarget.activeLat, currentTarget.activeLng], 19);
+            }
+        }
+
+        // ================= SWITCH MODE: CARI SATUAN VS BATCH LIST 15 =================
+        function switchSearchMode(mode) {
+            document.getElementById("tab-single").classList.toggle("active", mode === "single");
+            document.getElementById("tab-batch").classList.toggle("active", mode === "batch");
+            document.getElementById("panel-single").style.display = (mode === "single") ? "block" : "none";
+            document.getElementById("panel-batch").style.display = (mode === "batch") ? "block" : "none";
         }
 
         function onSearchHomepass() {
@@ -692,8 +835,8 @@
                 }
 
                 if (homepassMap.has(q)) {
-                    let coords = homepassMap.get(q);
-                    selectTargetHomepass(q, coords[0], coords[1], true);
+                    let c = homepassMap.get(q);
+                    selectTargetHomepass(q, c[0], c[1], true);
                 }
 
                 let matches = [];
@@ -713,13 +856,12 @@
                 listEl.innerHTML = "";
                 matches.forEach(hpId => {
                     let c = homepassMap.get(hpId);
-                    let combinedStr = `${c[0]},${c[1]}`;
                     let itemDiv = document.createElement("div");
                     itemDiv.className = "auto-item";
                     itemDiv.innerHTML = `
                         <div>
-                            <b style="color:#fcd34d; font-size:0.88rem;">🏷️ ${hpId}</b><br>
-                            <span style="color:#38bdf8; font-size:0.75rem; font-family:monospace;">${combinedStr}</span>
+                            <b style="color:#fcd34d; font-size:0.86rem;">🏷️ ${hpId}</b><br>
+                            <span style="color:#38bdf8; font-size:0.74rem; font-family:monospace;">${c[0]},${c[1]}</span>
                         </div>
                         <span style="background:rgba(16,185,129,0.2); color:#6ee7b7; padding:4px 8px; border-radius:8px; font-size:0.7rem; font-weight:800;">Pilih</span>
                     `;
@@ -727,7 +869,7 @@
                         document.getElementById("hp-search-input").value = hpId;
                         listEl.style.display = "none";
                         selectTargetHomepass(hpId, c[0], c[1], true);
-                        copyRawString(combinedStr, `Disalin: ${combinedStr}`);
+                        showToast(`Dipilih: ${hpId} (±${currentTarget.offsetMeters}m)`);
                     };
                     listEl.appendChild(itemDiv);
                 });
@@ -735,120 +877,173 @@
             }, 90);
         }
 
-        async function pasteAndSearch() {
+        async function pasteSingleSearch() {
             try {
                 let text = await navigator.clipboard.readText();
                 if (text) {
                     let clean = text.trim().toUpperCase();
                     document.getElementById("hp-search-input").value = clean;
-                    if (homepassMap.has(clean)) {
-                        let c = homepassMap.get(clean);
-                        document.getElementById("autocomplete-list").style.display = "none";
-                        selectTargetHomepass(clean, c[0], c[1], true);
-                        copyRawString(`${c[0]},${c[1]}`, `Ditemukan & Disalin: ${c[0]},${c[1]}`);
-                    } else {
-                        onSearchHomepass();
-                    }
-                }
-            } catch (e) {
-                let manual = prompt("Tempel (Paste) Keycode Homepass:");
-                if (manual) {
-                    document.getElementById("hp-search-input").value = manual.trim().toUpperCase();
                     onSearchHomepass();
                 }
+            } catch (e) {}
+        }
+
+        // ================= LOGIKA BATCH LIST (15+ HOMEPASS NEXT / BACK) =================
+        async function pasteToBatchTextarea() {
+            try {
+                let text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById("batch-list-input").value = text;
+                    showToast("Daftar berhasil ditempel!");
+                }
+            } catch (e) {
+                showToast("Silakan tempel manual di kotak teks.");
             }
         }
 
-        function clearSearchInput() {
-            document.getElementById("hp-search-input").value = "";
-            document.getElementById("autocomplete-list").style.display = "none";
-            document.getElementById("hp-search-input").focus();
-        }
-
-        function selectTargetHomepass(hpId, lat, lng, saveRecent) {
-            let combinedCoord = `${lat},${lng}`;
-            currentTarget = { id: hpId, lat: lat, lng: lng, combined: combinedCoord };
-
-            document.getElementById("selected-hp-id").innerText = hpId;
-            document.getElementById("unified-coord-display").innerText = combinedCoord;
-            document.getElementById("btn-copy-coord").disabled = false;
-            document.getElementById("btn-play-mock").disabled = false;
-            document.getElementById("btn-geo-intent").disabled = false;
-
-            if (leafletMap) {
-                let pinIcon = L.divIcon({
-                    className: '',
-                    html: `<div class="teleport-pin">📍</div>`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                });
-
-                if (targetMarker) targetMarker.setLatLng([lat, lng]);
-                else targetMarker = L.marker([lat, lng], { icon: pinIcon }).addTo(leafletMap);
-
-                targetMarker.bindPopup(`<b>🏷️ ${hpId}</b><br><code style="color:#38bdf8;">${combinedCoord}</code>`).openPopup();
-                leafletMap.setView([lat, lng], 18);
+        function processBatchList() {
+            let rawText = document.getElementById("batch-list-input").value.toUpperCase();
+            if (!rawText.trim()) {
+                showToast("Kotak daftar masih kosong!");
+                return;
             }
 
-            if (saveRecent) addRecentHomepass(hpId);
+            // Ekstrak seluruh pola ID Homepass (misal PAD1-AAT01-H01142) dan abaikan nomor urut "1.", "2.", dll.
+            let regex = /[A-Z0-9]{3,6}-[A-Z0-9]{3,8}-[A-Z0-9]{3,8}/g;
+            let extracted = rawText.match(regex) || [];
 
-            if (isMockingActive) startFakeGPS();
+            // Jika regex tidak menangkap (misal format berbeda), pisahkan per baris & bersihkan nomor depan
+            if (extracted.length === 0) {
+                extracted = rawText.split(/\r?\n/)
+                    .map(line => line.replace(/^\s*\d+[\.\)\-\s]+/, "").trim())
+                    .filter(Boolean);
+            }
+
+            // Filter hanya ID yang valid di database dan hilangkan duplikat
+            let validList = [];
+            let seen = new Set();
+            extracted.forEach(id => {
+                if (homepassMap.has(id) && !seen.has(id)) {
+                    seen.add(id);
+                    validList.push(id);
+                }
+            });
+
+            if (validList.length === 0) {
+                alert("Tidak ditemukan Keycode Homepass yang cocok di dalam database!");
+                return;
+            }
+
+            batchQueue = validList;
+            batchIndex = 0;
+            document.getElementById("queue-panel").style.display = "block";
+            loadBatchItemAtIndex(0);
+            showToast(`Berhasil memuat ${batchQueue.length} antrean Homepass!`);
         }
 
+        function loadBatchItemAtIndex(idx) {
+            if (idx < 0 || idx >= batchQueue.length) return;
+            batchIndex = idx;
+
+            let hpId = batchQueue[batchIndex];
+            let coords = homepassMap.get(hpId);
+
+            document.getElementById("queue-counter-label").innerText = `Antrean ${batchIndex + 1} dari ${batchQueue.length}`;
+            document.getElementById("btn-prev-hp").disabled = (batchIndex === 0);
+            document.getElementById("btn-next-hp").disabled = (batchIndex === batchQueue.length - 1);
+
+            selectTargetHomepass(hpId, coords[0], coords[1], true);
+        }
+
+        function navigateQueue(step) {
+            let nextIdx = batchIndex + step;
+            if (nextIdx >= 0 && nextIdx < batchQueue.length) {
+                loadBatchItemAtIndex(nextIdx);
+                showToast(`Pindah ke #${nextIdx + 1}: ${batchQueue[nextIdx]}`);
+            }
+        }
+
+        function closeQueuePanel() {
+            batchQueue = [];
+            batchIndex = 0;
+            document.getElementById("queue-panel").style.display = "none";
+        }
+
+        // ================= KONTROL PLAY, STOP & DRIFT ALAMI 1-10 METER =================
         function startFakeGPS() {
-            if (!currentTarget.combined) return;
+            if (currentTarget.baseLat === null) return;
             isMockingActive = true;
 
-            copyRawString(currentTarget.combined, null);
+            pushCoordsToNativeMock();
 
-            if (window.AndroidMockGPS && typeof window.AndroidMockGPS.startMock === "function") {
-                window.AndroidMockGPS.startMock(
-                    parseFloat(currentTarget.lat),
-                    parseFloat(currentTarget.lng),
-                    String(currentTarget.id)
-                );
-                showToast(`🚀 Mock GPS Aktif: ${currentTarget.id}`);
-            } else {
-                triggerExternalFakeGPSIntent();
-            }
+            // Saat Play aktif, lakukan pergeseran mikro alami setiap 2 detik di dalam radius 1-10m
+            clearInterval(driftInterval);
+            driftInterval = setInterval(() => {
+                if (!isMockingActive || currentTarget.baseLat === null) return;
+                let microDrift = generateRandomOffsetCoords(currentTarget.baseLat, currentTarget.baseLng);
+                currentTarget.activeLat = microDrift.lat;
+                currentTarget.activeLng = microDrift.lng;
+                currentTarget.offsetMeters = microDrift.meters;
+                currentTarget.combined = `${microDrift.lat},${microDrift.lng}`;
+
+                document.getElementById("unified-coord-display").innerText = currentTarget.combined;
+                document.getElementById("drift-badge").innerText = `Offset: ±${microDrift.meters}m`;
+                if (targetMarker) {
+                    targetMarker.setLatLng([microDrift.lat, microDrift.lng]);
+                }
+                pushCoordsToNativeMock();
+            }, 2000);
 
             let banner = document.getElementById("mock-banner");
             banner.classList.add("active");
-            document.getElementById("mock-status-text").innerText = `AKTIF: ${currentTarget.id} (${currentTarget.combined})`;
+            document.getElementById("mock-status-text").innerText = `AKTIF: ${currentTarget.id} (±${currentTarget.offsetMeters}m)`;
             document.getElementById("mock-status-text").style.color = "#6ee7b7";
             document.getElementById("btn-stop-mock").disabled = false;
-            document.getElementById("btn-play-mock").innerHTML = "🔄 PINDAH TITIK";
+            document.getElementById("btn-play-mock").innerHTML = "🔄 ACAK ULANG TITIK";
+
+            showToast(`▶️ Fake GPS Aktif di ${currentTarget.id}`);
+        }
+
+        function pushCoordsToNativeMock() {
+            if (window.AndroidMockGPS && typeof window.AndroidMockGPS.startMock === "function") {
+                window.AndroidMockGPS.startMock(
+                    parseFloat(currentTarget.activeLat),
+                    parseFloat(currentTarget.activeLng),
+                    String(currentTarget.id)
+                );
+            }
         }
 
         function stopFakeGPS() {
             isMockingActive = false;
+            clearInterval(driftInterval);
+
             if (window.AndroidMockGPS && typeof window.AndroidMockGPS.stopMock === "function") {
                 window.AndroidMockGPS.stopMock();
             }
+
             let banner = document.getElementById("mock-banner");
             banner.classList.remove("active");
             document.getElementById("mock-status-text").innerText = "NONAKTIF (GPS Asli)";
             document.getElementById("mock-status-text").style.color = "#f8fafc";
             document.getElementById("btn-stop-mock").disabled = true;
             document.getElementById("btn-play-mock").innerHTML = "▶️ PLAY FAKE GPS";
+
             showToast("⏹️ Mock GPS Dimatikan.");
         }
 
-        function triggerExternalFakeGPSIntent() {
-            if (!currentTarget.combined) return;
-            copyRawString(currentTarget.combined, null);
-            showToast(`Koordinat ${currentTarget.combined} disalin & dikirim ke GPS App!`);
-            window.location.href = `geo:${currentTarget.combined}?q=${currentTarget.combined}(${encodeURIComponent(currentTarget.id)})`;
+        // ================= PINTASAN LANGSUNG KE DEVELOPER OPTIONS HP =================
+        function openDeveloperSettings() {
+            if (window.AndroidMockGPS && typeof window.AndroidMockGPS.openDevSettings === "function") {
+                window.AndroidMockGPS.openDevSettings();
+            } else {
+                showToast("Fitur pintasan aktif setelah menjadi APK.");
+            }
         }
 
         function copyUnifiedCoord() {
             if (!currentTarget.combined) return;
             copyRawString(currentTarget.combined, `Disalin: ${currentTarget.combined}`);
-        }
-
-        function copyKeycodeOnly() {
-            if (!currentTarget.id) return;
-            copyRawString(currentTarget.id, `Keycode disalin: ${currentTarget.id}`);
         }
 
         function copyRawString(str, toastMsg) {
@@ -873,45 +1068,11 @@
             document.body.removeChild(ta);
         }
 
-        function addRecentHomepass(hpId) {
-            let list = JSON.parse(localStorage.getItem("hp_local_recent") || "[]");
-            list = list.filter(x => x !== hpId);
-            list.unshift(hpId);
-            if (list.length > 6) list.pop();
-            localStorage.setItem("hp_local_recent", JSON.stringify(list));
-            renderRecentChips();
-        }
-
-        function renderRecentChips() {
-            let list = JSON.parse(localStorage.getItem("hp_local_recent") || "[]");
-            let box = document.getElementById("recent-box");
-            let container = document.getElementById("recent-chips");
-            if (list.length === 0) {
-                box.style.display = "none";
-                return;
-            }
-            box.style.display = "block";
-            container.innerHTML = "";
-            list.forEach(hpId => {
-                if (!homepassMap.has(hpId)) return;
-                let span = document.createElement("span");
-                span.className = "recent-chip";
-                span.innerText = hpId;
-                span.onclick = () => {
-                    let c = homepassMap.get(hpId);
-                    document.getElementById("hp-search-input").value = hpId;
-                    selectTargetHomepass(hpId, c[0], c[1], false);
-                    copyRawString(`${c[0]},${c[1]}`, `Disalin: ${c[0]},${c[1]}`);
-                };
-                container.appendChild(span);
-            });
-        }
-
         function showToast(msg) {
             let t = document.getElementById("toast");
             t.innerText = msg;
             t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 2200);
+            setTimeout(() => t.classList.remove("show"), 2100);
         }
     </script>
 </body>
